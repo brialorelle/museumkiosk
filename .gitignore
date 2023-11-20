@@ -1,0 +1,7 @@
+
+.DS_Store
+
+code/_dev*
+code/node_modules/*
+code/bria@stanford-cogsci.org
+code/experiment.zip
