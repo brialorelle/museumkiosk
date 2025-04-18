@@ -1,3 +1,9 @@
+html, body {
+    overflow: hidden;
+    max-height: 100%;
+    max-width: 100%;
+}
+
 body {
     font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
 }
@@ -11,7 +17,7 @@ button {
     padding-left: 5px;
     padding-right: 5px;
     /*height: 50px;*/
-    min-width: 150px;
+    min-width: 20vw;
 }
 
 button:active {
@@ -33,12 +39,13 @@ button[disabled] {
     padding-top:15px;
     padding-bottom:15px;
 }
+
 .ageButton {
-    font-size: 3vw;
+    font-size: min(2.5vw,3.7vh);
     text-align:center;
     font-family: Schoolbell,cursive;
     font-style: italic;
-    margin: 10px;
+    margin: min(1vw,2vh);
 }
 
 .thanksButton {
@@ -68,7 +75,8 @@ button[disabled] {
 }
 
 .startButton{
-    width:15vw;
+    max-height: 60vh;
+    max-width: 50vw;
     height:auto;
     margin-top:2vw;
 }
@@ -107,6 +115,10 @@ button[disabled] {
     border: solid 5px #999;
 }
 
+#consentForm {
+    font-size: min(1.25vw,2vh);
+}
+
 .bufferSlides {
     height: auto;
     width: auto;
@@ -127,7 +139,7 @@ button[disabled] {
 #consentText {
     /*bottom: 15%;*/
     font-size: 1.5vw;
-    padding: 3vw;
+    padding: 1.5vw 3vw;
     padding-bottom:1vw;
 }
 
@@ -145,12 +157,14 @@ button[disabled] {
     border: solid 5px #999;
     display:block;
     margin:0 auto;
+    max-height: 50vh;
 }
 
 #kidConsent {
     /*position: absolute;*/
     top: 20vh;
     width: 95%;
+
     left: 0;
     right: 0;
     margin: auto;
@@ -167,6 +181,10 @@ button[disabled] {
     width: 50px;
     height: 50px;
     border: solid 5px #999;
+}
+
+.ageText {
+    font-family: Schoolbell,cursive; text-align:center; font-size: min(2.5vw, 3.7vh);
 }
 
 #ageDraw {
@@ -238,6 +256,10 @@ button[disabled] {
     touch-action: none;
 }
 
+.label-text {
+    font-family: Schoolbell,cursive; text-align:center; font-size:min(5vw,11vh);
+}
+
 #ready {
     font-size: 1em;
     position:absolute;
@@ -255,10 +277,8 @@ button[disabled] {
 #checkConsent {
     /*position: absolute;*/
     background: #ffffff;
-    left: 25%;
-    bottom: 10%;
-    width: 50px;
-    height: 50px;
+    width: 4vw;
+    height: 4vw;
     border: solid 5px #999;
 }
 
@@ -341,7 +361,7 @@ button[disabled] {
 
 
 #startConsent {
-    width: 50%;
+    max-width: 50vw;
     display: block;
     margin: auto;
     cursor:pointer;
@@ -351,7 +371,7 @@ button[disabled] {
 .logo-text {
     font-weight: bold;
     font-style: italic;
-    font-size:3vw;
+    font-size:min(3vw,4vh);
     margin-top:1vh;
 
 }
@@ -381,7 +401,7 @@ button[disabled] {
 }
 
 .startExp{
-    font-size: 4vw;
+    font-size: min(4vw,5vh);
     font-family: Schoolbell,cursive;
     font-style: italic;
 }
