@@ -5,3 +5,5 @@ code/_dev*
 code/node_modules/*
 code/bria@stanford-cogsci.org
 code/experiment.zip
+mongo_auth.json
+bria@stanford-cogsci.org
