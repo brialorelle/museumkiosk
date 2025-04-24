@@ -505,12 +505,12 @@ window.onload = function() {
         ctx=canvas.getContext("2d");
     //landscape mode 00 inne
     if (window.innerWidth > window.innerHeight){
-        canvas.height = window.innerHeight*.80;;
+        canvas.height = window.innerHeight*.70;;
         canvas.width = canvas.height;
     }
     // portrait mode -- resize to height
     else if(window.innerWidth < window.innerHeight){ 
-        canvas.height = window.innerHeight*.80;;
+        canvas.height = window.innerHeight*.70;;
         canvas.width = canvas.height;
     }  
 

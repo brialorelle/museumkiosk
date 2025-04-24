@@ -1,3 +1,12 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    max-height: 100%;
+    max-width: 100%;
+}
+
+
 body {
     font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
 }
@@ -11,7 +20,7 @@ button {
     padding-left: 5px;
     padding-right: 5px;
     /*height: 50px;*/
-    min-width: 150px;
+    min-width: 20vw;
 }
 
 button:active {
@@ -67,10 +76,14 @@ button[disabled] {
     /*margin-top:8vw;*/
 }
 
+.label-text {
+    font-family: Schoolbell,cursive; display: inline-block; vertical-align: top; 
+    font-size:min(6vw,10vh)
+}
 .startButton{
     display: inline-block;
-    width:10hw;
-    height:auto;
+    max-width: 40vw;
+    max-height: 50vh;
     margin-top:1vw;
     margin-left:1hw;
     margin-right:1vw;
@@ -336,8 +349,8 @@ button[disabled] {
 }
 
 
-#startConsent {
-    width: 40%;
+.startConsent {
+    max-width: 40%;
     display: block;
     margin: auto;
     cursor:pointer;
@@ -350,10 +363,11 @@ button[disabled] {
     margin-top:1vh;
 
 }
-#stanfordLogo{
-    text-align:center;
-    width:20vw;
-    padding-top:3vw;
+#stanfordLogo {
+    text-align: center;
+    max-width: 25vw;
+    max-height: 25vh;
+    padding-top: 2vh;
 }
 
 #parentEmail{
