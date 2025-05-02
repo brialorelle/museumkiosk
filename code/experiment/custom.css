@@ -157,7 +157,6 @@ button[disabled] {
     border: solid 5px #999;
     display:block;
     margin:0 auto;
-    max-height: 50vh;
 }
 
 #kidConsent {

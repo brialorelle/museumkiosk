@@ -185,9 +185,7 @@ function loadNextVideo(){
 }
 
 function setUpDrawing(){
-    
-
-    var imgSize = "70%";
+    var imgSize = "80%";
     disableDrawing = false;
     $('#sketchpad').css({"background": "", "opacity":""});
 
@@ -505,7 +503,7 @@ window.onload = function() {
         ctx=canvas.getContext("2d");
     //landscape mode 00 inne
     if (window.innerWidth > window.innerHeight){
-        canvas.height = window.innerHeight*.70;;
+        canvas.height = window.innerWidth*.60;
         canvas.width = canvas.height;
     }
     // portrait mode -- resize to height
