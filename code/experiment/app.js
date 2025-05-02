@@ -15,13 +15,14 @@ var
 var gameport;
 
 const gmailCreds = require('./gmail_creds.json');
+require('dotenv/config');
 
 if(argv.gameport) {
     gameport = argv.gameport;
     console.log('using port ' + gameport);
 } else {
-    gameport = 8880;
-    console.log('no gameport specified: using 8880\nUse the --gameport flag to change');
+    gameport = 9002;
+    console.log(`no gameport specified: using ${gameport}\nUse the --gameport flag to change`);
 }
 
 var mode;
@@ -33,24 +34,24 @@ if(argv.mode) {
     console.log('no mode specified: using CDM\nUse the --mode flag to change');
 }
 
-
 try {
-    var privateKey  = fs.readFileSync('/etc/apache2/ssl/stanford-cogsci_org.key'),
-        certificate = fs.readFileSync('/etc/apache2/ssl/stanford-cogsci_org.crt'),
-        intermed    = fs.readFileSync('/etc/apache2/ssl/stanford-cogsci_org.ca-bundle'),
-        options     = {key: privateKey, cert: certificate, ca: intermed},
+    let credentials = process.env.CREDENTIALS_PATH || 'credentials/';
+    var privateKey  = fs.readFileSync(`${credentials}ssl_key.pem`),
+        certificate = fs.readFileSync(`${credentials}ssl_cert.pem`),
+        options     = {key: privateKey, cert: certificate},
         server      = require('https').createServer(options,app).listen(gameport),
-        io          = require('socket.io')(server);
+        io          = require('socket.io')(server, {
+			path: '/kiddraw/socket.io'});
 } catch (err) {
     console.log("cannot find SSL certificates; falling back to http");
     var server      = app.listen(gameport),
-        io          = require('socket.io')(server);
+        io          = require('socket.io')(server, {
+			path: '/kiddraw/socket.io'});
 }
 
 app.get('/*', (req, res) => {
     serveFile(req, res);
 });
-
 
 
 // var socket = io.connect('http://localhost:8001');
@@ -72,7 +73,7 @@ io.on('connection', function (socket) {
 });
 
 var serveFile = function(req, res) {
-    var fileName = req.params[0];
+    var fileName = req.params[0] || 'index.html';
 
     if (fileName == "send"){
         console.log('sending the consent form to the parent email');
@@ -91,7 +92,7 @@ var serveFile = function(req, res) {
 
 var writeDataToMongo = function(data) {
     sendPostRequest(
-        'http://localhost:4000/db/insert',
+        'http://ucsdlearninglabs.org:9001/db/insert',
         { json: data },
         (error, res, body) => {
         if (!error && res.statusCode === 200) {
@@ -113,7 +114,7 @@ var smtpTransport = nodemailer.createTransport({
 
 function sendEmail(req,res) {
     var mailOptions = {
-        from: 'kiddrawsanjose@gmail.com',
+        from: 'tsepuri@ucsd.edu',
         to: req.query.email,
         subject: 'Copy of Consent Form - Stanford Language and Cognition Lab',
         text: "Dear parents, Please find attached the copy of the consent form from the drawing station at the CDM. Thank you!!",

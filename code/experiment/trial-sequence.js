@@ -7,7 +7,9 @@ Last updates July 2019
 
 // 0. Load dependenciese
 paper.install(window);
-socket = io.connect();
+const socket = io.connect('/', {
+    path: '/kiddraw/socket.io'
+});
 
 // 1. Setup trial order and randomize it!
 firstTrial = {"category": "this square", "video": "copy_square.mp4", "image":"images/square.png"}
@@ -503,7 +505,7 @@ window.onload = function() {
         ctx=canvas.getContext("2d");
     //landscape mode 00 inne
     if (window.innerWidth > window.innerHeight){
-        canvas.height = window.innerWidth*.60;
+        canvas.height = window.innerWidth*.625;
         canvas.width = canvas.height;
     }
     // portrait mode -- resize to height

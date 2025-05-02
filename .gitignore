@@ -5,7 +5,9 @@ code/_dev*
 code/node_modules/*
 code/bria@stanford-cogsci.org
 code/experiment.zip
+code/experiment/auth.json
+code/experiment/gmail_creds.json
 mongo_auth.json
 bria@stanford-cogsci.org
 **/node_modules
-
+credentials/

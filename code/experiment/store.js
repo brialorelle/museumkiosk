@@ -11,9 +11,9 @@ const colors = require('colors/safe');
 
 const app = express();
 const MongoClient = mongodb.MongoClient;
-const port = 4000;
+const port = 9001;
 const mongoCreds = require('./mongo_auth.json');
-const mongoURL = `mongodb://${mongoCreds.user}:${mongoCreds.password}@127.0.0.1:27017/`;
+const mongoURL = mongoCreds.url;
 const handlers = {};
 
 function makeMessage(text) {
