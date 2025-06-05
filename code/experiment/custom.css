@@ -71,7 +71,7 @@ button[disabled] {
     bottom: 10%;
     width:280px;
     text-align: center;
-    /*margin-top:8vw;*/
+    margin-top:1vw;
 }
 
 .startButton{
@@ -164,12 +164,24 @@ button[disabled] {
     /*position: absolute;*/
     top: 20vh;
     width: 95%;
-
     left: 0;
     right: 0;
     margin: auto;
     background: #ffffff;
-    border: solid 5px #999;
+    border: solid 2px #999;
+    text-align: center;
+}
+
+#kidConsentIndia {
+    position: absolute;
+    top: 15vh;
+    width: 95%;
+    left: 0;
+    right: 0;
+    margin: auto;
+    background: #ffffff;
+    border: solid 1px #999;
+    padding: 5vw;
     text-align: center;
 }
 
@@ -213,7 +225,7 @@ button[disabled] {
     right: 0;
     margin: auto;
     font-family: Schoolbell,cursive;
-    margin-top:3vh;
+    margin-top:40vh;
     margin-bottom:2vh;
 }
 
@@ -244,6 +256,24 @@ button[disabled] {
     bottom:0;
     margin:auto;
     touch-action: none;
+}
+
+#cueAudio {
+    width:1vw;
+    height:1vw;
+    left: 0;
+    right: 0;
+    top:0;
+    bottom:0;
+    margin:auto;
+    touch-action: none;
+}
+
+.vjs-hidden-player {
+    width: 0 !important;
+    height: 0 !important;
+    visibility: hidden !important;
+    display: none !important;
 }
 
 .videoDiv {
@@ -352,7 +382,7 @@ button[disabled] {
 }
 
 
-#keepGoing {
+.keepGoing {
     font-size: 4vw;
     text-align:center;
     font-family: Schoolbell,cursive;
@@ -367,6 +397,10 @@ button[disabled] {
     cursor:pointer;
     margin-top:4vh;
 }
+
+#startCDM {
+    display: inline-block;
+  }
 
 .logo-text {
     font-weight: bold;
@@ -404,6 +438,7 @@ button[disabled] {
     font-size: min(4vw,5vh);
     font-family: Schoolbell,cursive;
     font-style: italic;
+    padding: 1vw;
 }
 
 .vjs-nofull .vjs-fullscreen-control {
@@ -521,6 +556,12 @@ button[disabled] {
     max-width: 10vw;
     height:auto;
     margin-top: 0vw!important;
+}
+
+#keepDrawing .startButton {
+    max-height: 30vh;
+    max-width: 30vw;
+    height:auto;
 }
 
 /* Thank you image */
