@@ -12,38 +12,61 @@ Last updates July 2019
 });
 
 // 1. Setup trial order and randomize it!
-firstTrial = {"category": "this square", "audio": "copy_square.mp3", "image":"images/square.png"}
-trace1 = {"category":"square", "audio": "trace_square.mp3", "image":"images/square.png"}
-trace2 = {"category":"shape", "audio": "trace_shape.mp3","image":"images/shape.png"}
 intro = {"category":"intro", "audio": "intro.mp3","image":"images/lab_logo_stanford.png"}
 bonusPrompt =  {"category": "bonus", "audio": "bonus.mp3"}
+donePrompt = {"category": "done", "audio": "good_job.mp3"}
 
+var drawingTutorial = {"category": "tutorial", "audio": "tutorial.mp3", "gif": "videos_smaller/drawing_tutorial.gif"}
+
+var traceList = [{"category":"line", "audio": "trace_line.mp3", "image":"images/line.png"},
+    {"category":"two lines", "audio": "trace_two_lines.mp3", "image":"images/two_lines.png"},
+    {"category":"three lines", "audio": "trace_three_lines.mp3", "image":"images/three_lines.png"},
+    {"category":"square", "audio": "trace_four_lines.mp3", "image":"images/square.png"},
+    {"category":"circle", "audio": "trace_circle.mp3", "image":"images/circle.png"},
+    {"category":"shape", "audio": "trace_shapes.mp3","image":"images/shape.png"},
+    {"category":"shapes", "audio": "trace_shapes.mp3", "image":"images/square_circle.png"}
+]
 var readable_date;
-var stimListTest = [{"category": "a ball", "audio": "ball.mp3"},
-    {"category": "a person", "audio": "person.mp3"},
-    {"category": "a lion", "audio": "lion.mp3"},
+var stimListTest = [
+    {"category": "a woman", "audio": "woman.mp3"},
+    {"category": "a bus", "audio": "bus.mp3"},
+    {"category": "a car", "audio": "car.mp3"},
+    {"category": "a chair", "audio": "chair.mp3"},
+    {"category": "a dog", "audio": "dog.mp3"},
     {"category": "a face", "audio": "face.mp3"},
-    {"category": "a cup", "audio": "cup.mp3"},
-    {"category": "a monkey", "audio": "monkey.mp3"},
-    {"category": "a spoon", "audio": "spoon.mp3"},
-    {"category": "a truck", "audio": "truck.mp3"}]
+    {"category": "a house", "audio": "house.mp3"},
+    {"category": "a phone", "audio": "phone.mp3"},
+    {"category": "a tree", "audio": "tree.mp3"},
+    {"category": "a man", "audio": "man.mp3"},
+    {"category": "a fish", "audio": "fish.mp3"},
+    {"category": "a cup", "audio": "cup.mp3"}]
 
-var bonusList = [{"category": "a crab", "audio": "crab.mp3"}, {"category": "a crocodile", "audio": "crocodile.mp3"}]
+var bonusList = [{"category": "a spoon", "audio": "spoon.mp3"},
+     {"category": "a train", "audio": "train.mp3"},
+     {"category": "a bird", "audio": "bird.mp3"},
+     {"category": "a button", "audio": "button.mp3"},
+     {"category": "a cat", "audio": "cat.mp3"},
+     {"category": "eyeglasses", "audio": "eyeglasses.mp3"},
+     {"category": "shoe", "audio": "shoe.mp3"},
+     {"category": "a banana", "audio": "banana.mp3"},
+     {"category": "a toothbrush", "audio": "toothbrush.mp3"},
+     {"category": "a key", "audio": "key.mp3"},
+     {"category": "a monkey", "audio": "monkey.mp3"}]
 
 var stimListTest = shuffle(stimListTest)
-stimListTest.unshift(firstTrial)
-stimListTest.unshift(trace2)
-stimListTest.unshift(trace1)
-stimListTest.unshift(intro)
+var bonusList = shuffle(bonusList)
+stimListTest.unshift(...traceList)
+stimListTest.unshift(drawingTutorial)
 stimListTest.push(bonusPrompt)
 
 var maxTrials = stimListTest.length; //
 var bonusTrialsMax = stimListTest.length; 
-var curTrial=1  // global variable, trial counter
-
+var curTrial=0  // global variable, trial counter
+console.log(bonusTrialsMax)
 var stimLang = {
     "this square": "this square",
     "square": "square",
+    "line": "line",
     "shape": "shape",
     "a crab": "a crab",
     "a crocodile": "a crocodile",
@@ -53,6 +76,13 @@ var stimLang = {
     "a monkey": "a monkey",
     "a panda": "a panda",
     "a truck": "a truck",
+    "a face": "a face",
+    "a spoon": "a spoon",
+    "a cup": "a cup",
+    "a person": "a person",
+    "a man": "a man",
+    "a woman": "a woman",
+    "a ball": "a ball",
     "museum": "the museum"}
 
 var cuesLang = {
@@ -60,17 +90,20 @@ var cuesLang = {
     "copy": "Can you copy ",
     "draw": "Can you draw ",
     "endQuestion": " ?",
-    "bonus": "You're all done! Click the button below to keep drawing!"
+    "bonus": "You're all done! Click the button on the right to keep drawing!",
+    "demo": "Ask Urvi to help you with this drawing!",
+    "tutorial": "Try drawing anything with one finger!",
+    "done": "Good job! The game is over."
 }
 var checkBoxAlert = "Can we use your child's drawings? If so, please click the box above to start drawing!";
-var ageAlert = "Please select your age group.";
+var idAlert = "Please enter a correctly formatted ID (two letters followed by three digits)";
 
 // set global variables
 var clickedSubmit=0; // whether an image is submitted or not
 var tracing = true; //whether the user is in tracing trials or not
-var maxTraceTrial = 2; //the max number of tracing trials
+var maxTraceTrial = traceList.length; //the max number of tracing trials
 maxTraceTrial = maxTraceTrial + 1 // add one because the intro technically gets logged as a trial
-var timeLimit=10;
+var timeLimit=120;
 var disableDrawing = false; //whether touch drawing is disabled or not
 var language = "English";
 var strokeThresh = 3; // each stroke needs to be at least this many pixels long to be sent
@@ -97,15 +130,8 @@ function shuffle (a)
 
 // for each time we start drawings
 function startDrawing(){
-    if (curTrial==0){
-        $(consentPage).fadeOut('fast'); // fade out age screen
-        showIntroAudio();  
-    }
     if (curTrial<maxTrials) {
-        $(consentPage).fadeOut('fast');
-        tracing = false
-        $('#sketchpad').css('background-image','');
-        if (curTrial == 1) {
+        if (curTrial == 0) {
             $(consentPage).fadeOut('fast');
         }
         if (curTrial == maxTraceTrial){
@@ -122,7 +148,7 @@ function startDrawing(){
 
 function showIntroAudio(){
     var player = loadNextAudio(curTrial); // change video
-    document.getElementById("cue").innerHTML = "This game is for only one person at a time. Please draw by yourself!";
+    document.getElementById("audioCue").innerHTML = "This game is for only one person at a time. Please draw by yourself!";
     setTimeout(function() {showCue();},1000);
     setTimeout(function() {playAudio(player);},1000);
 }
@@ -131,29 +157,39 @@ function showIntroAudio(){
 // for the start of each trial
 function beginTrial(){
     //
-    console.log(stimListTest[curTrial].category)
     var player = loadNextAudio(curTrial); // change video
-    if (tracing){
-        var traceCue = cuesLang["trace"]  + stimLang[stimListTest[curTrial].category] + cuesLang["endQuestion"];
-        document.getElementById("cue").innerHTML = traceCue;
+    if (curTrial < maxTrials) {
+        var categoryKey = stimListTest[curTrial].category;
+        var categoryName = stimLang[categoryKey] || categoryKey;    
+    }
+    if (curTrial == 0) {
+        var cue = cuesLang["tutorial"];
+        document.getElementById("audioCue").innerHTML = cue
+
+        document.getElementById("drawingCue").innerHTML = "Anything!"
+    } else if (curTrial == maxTrials) {
+        document.getElementById("audioCue").innerHTML = cuesLang["done"];
+    }
+    else if (tracing){
+        var traceCue = cuesLang["trace"] + categoryName + cuesLang["endQuestion"];
+        document.getElementById("audioCue").innerHTML = traceCue;
         document.getElementById("drawingCue").innerHTML = traceCue;
     }else {
         if (stimListTest[curTrial].category == 'this square'){
-            var circleCue = cuesLang["copy"]  + stimLang[stimListTest[curTrial].category] + cuesLang["endQuestion"];
-            document.getElementById("cue").innerHTML = circleCue;
+            var circleCue = cuesLang["copy"]  + categoryName + cuesLang["endQuestion"];
+            document.getElementById("audioCue").innerHTML = circleCue;
             document.getElementById("drawingCue").innerHTML = circleCue;
         } else if (stimListTest[curTrial].category == 'bonus'){
-            document.getElementById("cue").innerHTML = cuesLang[stimListTest[curTrial].category];
-            document.getElementById("cue").style.marginTop = "10vw";
-            $('#keepDrawing').fadeIn('fast');
+            document.getElementById("audioCue").innerHTML = cuesLang[stimListTest[curTrial].category];
         }
         else{
-            document.getElementById("cue").innerHTML = cuesLang["draw"] + stimLang[stimListTest[curTrial].category] + cuesLang["endQuestion"]; // change cue
-            console.log(document.getElementById("cue").innerHTML)
-            document.getElementById("drawingCue").innerHTML = stimLang[stimListTest[curTrial].category]; // change drawing cue
+            document.getElementById("audioCue").innerHTML = cuesLang["draw"] + categoryName + cuesLang["endQuestion"]; // change cue
+            console.log(document.getElementById("audioCue").innerHTML)
+            document.getElementById("drawingCue").innerHTML = categoryName; // change drawing cue
         }
 
     }
+    $("#audioRepeater").fadeOut();
     setTimeout(function() {showCue();},1000);
     setTimeout(function() {playAudio(player);},1000);
 }
@@ -161,36 +197,43 @@ function beginTrial(){
 // show cue without drawing canvas
 function showCue() {
     $('#mainExp').fadeIn('fast'); // fade in exp
-    $('#cue').fadeIn('fast'); // text cue associated with trial
+    $('#audioCue').fadeIn('fast'); // text cue associated with trial
+    if (stimListTest[curTrial].category == 'bonus') {
+        $('#keepDrawing').fadeIn('fast');
+    }
 }
 
 // video player functions
 function playAudio(player){
+    $("#cueAudioDiv").html("<audio id='cueAudio' class='video-js vjs-default-skin vjs-hidden-player'></audio>");
     $('#cueAudioDiv').fadeIn(); // show audio div (change the ID accordingly)
+    if (curTrial == 0) {
+        $("#gifContainer").fadeIn();
+    }
     player.ready(function() {
         this.play();
         this.on('ended', function() {
-            if (curTrial == bonusTrialsMax - 1){
-                setTimeout(endExperiment, 10000)
-            } else {
-                console.log('video ends and drawing starts');
-                $('#cueAudioDiv').fadeOut();
-                setTimeout(function(){
-                    $('#cue').hide(); // fade out cue
-                    player.dispose(); //dispose the old video and related eventlistener. Add a new video
-                    if (curTrial==0) { // after intro
-                        console.log('starting first trial')
-                        curTrial = curTrial + 1
-                        setTimeout(function() {beginTrial();},1000); /// start trial sequence after intro trial
-                    }
-                    else{ /// if not on introductory trial
-                        setUpDrawing(); // set up the drawing canvas
-                    }
-                    $("#cueAudioDiv").html("<audio id='cueAudio' class='video-js vjs-default-skin vjs-hidden-player'></audio>");
-                }, 500);
+            if (curTrial != bonusTrialsMax - 1 & curTrial != maxTrials){
+                $("#gifContainer").fadeOut();
+                $("#audioRepeater").fadeIn();
+                player.dispose();
+            } else if (curTrial == maxTrials) {
+                restartExperiment();
             }
         });
     });
+}
+
+function startDrawingPostAudio() {
+    console.log('video ends and drawing starts');
+    $("#audioRepeater").fadeOut();
+    $('#cueAudioDiv').fadeOut();
+    $("#audioGif").fadeOut();
+    setTimeout(function(){
+        $('#audioCue').hide(); // fade out cue
+        setUpDrawing(); // set up the drawing canvas
+        $("#cueAudioDiv").html("<audio id='cueAudio' class='video-js vjs-default-skin vjs-hidden-player'></audio>");
+    }, 500);
 }
 
 function loadNextAudio() {
@@ -200,8 +243,13 @@ function loadNextAudio() {
     });
     player.pause();
     player.volume(1); // set volume to max
-    console.log(stimListTest[curTrial].audio); // assuming you have an 'audio' key instead of 'video'
-    player.src({ type: "audio/mp3", src: "audio/" + stimListTest[curTrial].audio });
+    if (curTrial < maxTrials) {
+        var curAudio = stimListTest[curTrial].audio
+    } else {
+        var curAudio = donePrompt.audio
+    }
+    console.log(curAudio); // assuming you have an 'audio' key instead of 'video'
+    player.src({ type: "audio/mp3", src: "audio/" + curAudio });
     player.load();
     return player;
 }
@@ -211,7 +259,21 @@ function setUpDrawing(){
     disableDrawing = false;
     $('#sketchpad').css({"background": "", "opacity":""});
     console.log("setUpDrawing")
-    if (tracing){
+    if(curTrial == 0) {
+        // Show tutorial GIF
+        console.log(stimListTest[curTrial].gif)
+        var tutorialGifUrl = `url('${stimListTest[curTrial].gif}')`; // Replace with your actual GIF path
+        $('#sketchpad').css("background-image", tutorialGifUrl)
+            .css("background-size", imgSize)
+            .css("background-repeat", "no-repeat")
+            .css("background-position", "center center");
+        
+        // Remove GIF when participant touches/clicks the canvas
+        $('#sketchpad').one('mousedown touchstart', function() {
+            $('#sketchpad').css("background-image", "");
+        });
+    }
+    else if (tracing){
         //for all tracing trials, show the tracing image on the canvas
         var imageurl = "url('" + stimListTest[curTrial].image + "')";
         $('#sketchpad').css("background-image", imageurl)
@@ -305,7 +367,7 @@ function saveSketchData(){
 
     // get critical trial variables
     var category = stimListTest[curTrial].category;
-    var age = $('.active').attr('id');
+    var id = $("#participantID").val().trim();
     console.log(dataURL)
     // test stirng
     readable_date = new Date();
@@ -321,7 +383,7 @@ function saveSketchData(){
                 endTrialTime: Date.now(), // when trial was complete, e.g., now
                 startTrialTime: startTrialTime, // when trial started, global variable
                 date: readable_date,
-                age: age};
+                participantID: id};
 
     // send data to server to write to database
     socket.emit('current_data', current_data);
@@ -352,7 +414,7 @@ function showConsentPage(){
 
 function restartExperiment() {
    
-   var age = $('.active').attr('id'); // only active button from first page
+   var id = $("#participantID").val().trim(); // only active button from first page
    
    // send survey participation data
    var parent_drew = document.getElementById("survey_parent").checked
@@ -369,18 +431,18 @@ function restartExperiment() {
                 colname: version, 
                 location: mode,
                 date: readable_date,
-                age: age};
+                participantID: id};
 
     // send data to server to write to database
     socket.emit('current_data', current_data);
     console.log('sending survey data')
     
-    window.location.href="https://ucsdlearninglabs.org/kiddraw/sight_restored" // load back to regular landing page
+    window.location.href="https://ucsdlearninglabs.org/kiddraw/india_draw.html" // load back to regular landing page
 }
 
 function endExperiment(){
-    restartExperiment()
-    curTrial = -1;
+    curTrial = maxTrials
+    beginTrial()
 }
 
 function increaseTrial(){
@@ -439,10 +501,10 @@ window.onload = function() {
             }
 
         }else{
-            if($(".active").val()==undefined){
-                alert(ageAlert)
-            }
-            else {
+            var id = $("#participantID").val().trim();
+            if (id === "" || !/^[A-Za-z]{2}\d{3}$/.test(id)) {
+                alert(idAlert);
+            } else {
                 startDrawing();
             }
         }
@@ -455,23 +517,20 @@ window.onload = function() {
         $('.keepGoing').removeClass('bounce')
 
         console.log('touched next trial button');
-        if(clickedSubmit==0){// if the current trial has not timed out yet
-            console.log("here")
+        if (curTrial == bonusTrialsMax - 1) {
+            stimListTest = stimListTest.concat(bonusList)
+            maxTrials = stimListTest.length
+            curTrial = curTrial + 1
+            $('#keepDrawing').fadeOut('fast');
+        }
+        else if(clickedSubmit==0){// if the current trial has not timed out yet
             clickedSubmit=1; // indicate that we submitted - global variable
             if (curTrial != bonusTrialsMax - 1) {
                 increaseTrial(); // save data and increase trial counter
-            } else {
-                stimListTest = stimListTest.concat(bonusList)
-                maxTrials = stimListTest.length
-                curTrial = curTrial + 1
-                document.getElementById("cue").style.marginTop = "40vh";
-                $('#keepDrawing').fadeOut('fast');
             }
         }
         $('#drawing').hide(); // hide the canvas
         // if this is not the bonus trial prompt
-        console.log(curTrial)
-        console.log(bonusTrialsMax)
         if (curTrial != bonusTrialsMax) {
             project.activeLayer.removeChildren(); // clear the canvas
         }
@@ -490,6 +549,7 @@ window.onload = function() {
         $('#mainExp').hide();
         $('#drawing').hide();
         $('.keepGoing').removeClass('bounce')
+        $('#keepDrawing').fadeOut('fast');
         endExperiment();
     });
 
@@ -522,13 +582,23 @@ window.onload = function() {
         $(this).addClass('active')
     });
 
+    $('.replayCue').bind('touchstart mousedown', function(e){
+        e.preventDefault()
+        startDrawing()
+    });
+
+    $('.submitCue').bind('touchstart mousedown', function(e) {
+        e.preventDefault()
+        startDrawingPostAudio()
+    });
+
     /////////////// DRAWING PARAMETERS AND FUNCTIONS ///////////////
     var canvas = document.getElementById("sketchpad"),
         ctx=canvas.getContext("2d");
     //landscape mode 00 inne
     if (window.innerWidth > window.innerHeight){
-        canvas.height = window.innerWidth*.55;
-        canvas.width = canvas.height;
+        canvas.height = window.innerWidth*.6;
+        canvas.width = window.innerWidth*.63;
     }
     // portrait mode -- resize to height
     else if(window.innerWidth < window.innerHeight){ 
@@ -547,7 +617,7 @@ window.onload = function() {
         var svgString = path.exportSVG({asString: true});
         var category = stimListTest[curTrial].category;
         var readable_date = new Date();
-        var age = $('.active').attr('id');
+        var id = $("#participantID").val().trim();
         
         console.log('time since we started the trial')
         console.log(endStrokeTime - startTrialTime)
@@ -567,7 +637,7 @@ window.onload = function() {
             startStrokeTime: startStrokeTime,
             endStrokeTime: endStrokeTime,
             date: readable_date,
-            age: age};
+            participantID: id};
 
         // send stroke data to server
         console.log(stroke_data)
@@ -647,16 +717,16 @@ window.onload = function() {
     targetSketch.addEventListener('touchmove', touchMove, false);
     targetSketch.addEventListener('touchend', touchEnd, false);
 
-    // Refresh if no user activities in 60 seconds
+    // Refresh if no user activities in 5 mins
     var time = new Date().getTime();
     $(document.body).bind("touchstart touchmove touchend click", function(e) {
         time = new Date().getTime();
     });
 
-    var refreshTime = 120000
+    var refreshTime = 300000 // 5 mins
     function refresh() {
         if (new Date().getTime() - time >= refreshTime) {
-                window.location.href="https://ucsdlearninglabs.org/kiddraw/sight_restored"
+                window.location.href="https://ucsdlearninglabs.org/kiddraw/india_draw.html"
                 console.log("No user activities. Reload.")
         } else {
             setTimeout(refresh, refreshTime);

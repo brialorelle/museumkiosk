@@ -74,6 +74,12 @@ button[disabled] {
     margin-top:1vw;
 }
 
+.slideButtonIndia {
+    width: 100%;
+    margin:auto;
+    margin-top: 3vh;
+}
+
 .startButton{
     max-height: 60vh;
     max-width: 50vw;
@@ -157,7 +163,7 @@ button[disabled] {
     /*left: 2.5%;*/
     border: solid 5px #999;
     display:block;
-    margin:0 auto;
+    margin:0 0;
 }
 
 #kidConsent {
@@ -183,6 +189,7 @@ button[disabled] {
     border: solid 1px #999;
     padding: 5vw;
     text-align: center;
+    align-items: center;
 }
 
 #consentDraw {
@@ -197,6 +204,14 @@ button[disabled] {
 
 .ageText {
     font-family: Schoolbell,cursive; text-align:center; font-size: min(2.5vw, 3.7vh);
+}
+
+.idText {
+    font-family: Schoolbell,cursive; text-align:center; font-size: min(5vw, 7.4vh);
+}
+
+#participantID{
+    border: 1px solid #000;
 }
 
 #ageDraw {
@@ -218,15 +233,19 @@ button[disabled] {
     /*position:absolute;*/
 }
 
-#cue {
+.cue {
     font-size: 5vw;
     text-align:center;
     left: 0;
     right: 0;
     margin: auto;
     font-family: Schoolbell,cursive;
-    margin-top:40vh;
+    margin-top:3vh;
     margin-bottom:2vh;
+}
+
+#audioCue {
+    margin-top:15vh;
 }
 
 #drawingCue{
@@ -441,6 +460,11 @@ button[disabled] {
     padding: 1vw;
 }
 
+.startExpIndia {
+    font-size: min(8vw,10vh);
+    padding: 2vh 16vw;
+}
+
 .vjs-nofull .vjs-fullscreen-control {
     display:none;
 }
@@ -564,8 +588,29 @@ button[disabled] {
     height:auto;
 }
 
+
 /* Thank you image */
 #thanksPage img:last-of-type {
     width: 10%;
     margin-top: 1.5vw;
+}
+
+.buttonContainer {
+    display: flex;
+    justify-content: center;
+    gap: 0.5vw; /* Controls space between buttons */
+    margin-top: 2vw;
+}
+
+.cueButton {
+    text-align: center;
+    padding: 2vw 8vw;
+    border-radius: 1vw;
+    cursor: pointer;
+}
+
+.cueButton img {
+    width: 100%;
+    max-width: 280px;
+    height: auto;
 }

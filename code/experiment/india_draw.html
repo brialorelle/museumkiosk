@@ -43,20 +43,12 @@
             <!-- <img src="images/stanfordlogo.png" alt="Stanford University" id="stanfordLogo"></img> -->
             <!-- <p class='logo-text' style="font-size:1.5vw"  id="labName">Stanford Language and Cognition Lab</p> -->
         <!-- </div> -->
-        <div id="kidConsentIndia"> 
-            <p class="ageText"> HOW OLD ARE YOU ? </p>
-            <button class="btn btn-light ageButton" id="age2"> &nbsp 2 &nbsp </button>
-            <button class="btn btn-light ageButton" id="age3"> &nbsp 3 &nbsp </button>
-            <button class="btn btn-light ageButton" id="age4"> &nbsp 4 &nbsp  </button>
-            <button class="btn btn-light ageButton" id="age5"> &nbsp 5 &nbsp </button>
-            <button class="btn btn-light ageButton" id="age6"> &nbsp 6 &nbsp </button>
-            <button class="btn btn-light ageButton" id="age7"> &nbsp 7 &nbsp </button>
-            <button class="btn btn-light ageButton" id="age8"> &nbsp 8 &nbsp </button>
-            <button class="btn btn-light ageButton" id="age9"> &nbsp 9 &nbsp </button>
-            <button class="btn btn-light ageButton" id="age10"> &nbsp 10+ &nbsp </button>
-            <button class="btn btn-light ageButton" id="adult"> &nbsp Adult &nbsp </button>
-            <div class="slideButton">
-                <button class="btn btn-info startExp" id="startCDM"> LET'S DRAW! </button>
+        <div id="kidConsentIndia">
+            <p class="idText"> PLEASE ENTER YOUR ID </p>
+            <input type="text" id="participantID" placeholder="Type your ID here" style="width: 80%; margin: 10px auto; font-size: 6vh; padding: 2vh; text-align: center;">
+            
+            <div class="slideButton slideButtonIndia">
+                <button class="btn btn-info startExp startExpIndia" id="startCDM"> LET'S DRAW! </button>
             </div>
         </div>
         
@@ -134,16 +126,33 @@
 
 
     <div id="mainExp" style="display:none">
-        <div id ="cue" style="display:none;padding:2vw;"></div>
+        <div class="cue" id ="audioCue" style="display:none;padding:2vw;"></div>
+        <div class="buttonContainer" id="audioRepeater" style="display:none">
+            <div class="drawingButton imageButton cueButton replayCue">
+              <img src="images/restart.png" alt="Restart">
+              <p id="restart_button">Listen again</p>
+            </div>
+            <div class="drawingButton imageButton cueButton submitCue">
+              <img src="images/play.jpg" alt="Draw">
+              <p id="draw_button">Draw</p>
+            </div>
+          </div>
         <div id="cueAudioDiv" style="display:none;">
             <audio id="cueAudio" class="video-js vjs-default-skin vjs-hidden-player"></audio>
         </div>
-
-        <div id="keepDrawing" style="display:none">
-            <div class = "imageButton keepGoing">
-                <img class="startButton imageButton" src="images/play.jpg"></img>
+        <div id="gifContainer" style="text-align: center; display:none">
+            <img id="audioGif" src="videos_smaller/drawing_tutorial.gif"/>
+          </div>
+          <div class="buttonContainer" id="keepDrawing" style="display:none">
+            <div class="drawingButton imageButton allDone cueButton">
+              <img src="images/stop.jpg" alt="Stop">
+              <p>End game</p>
             </div>
-        </div>
+            <div class="drawingButton imageButton keepGoing cueButton">
+              <img src="images/play.jpg" alt="Draw">
+              <p>Keep drawing</p>
+            </div>
+          </div>
 
         <div id="drawing" style="display:none">
 
@@ -202,7 +211,7 @@
         <p id="restart" class="buttonDescription"> Restart </p>
         <img class="startButton" src="images/play.jpg" style="width:10%"></img>
     </div>
-    <img style="width:10%" src="images/thankyou.jpg"</img>
+    <img style="width:10%" src="images/thankyou.jpg"></img>
 </div>
 
 <div id="thanksBing" style="display:none;text-align:center">
