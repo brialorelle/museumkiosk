@@ -36,7 +36,7 @@ stimListTest.push(lastTrial)
 
 var curTrial=0 // global variable, trial counter
 var maxTrials = stimListTest.length; //
-
+var defaultLocation = "https://ucsdlearninglabs.org/kiddraw?mode=birch"
 
 var stimLang = {
     "this square": "this square",
@@ -60,6 +60,7 @@ var cuesLang = {
 }
 var checkBoxAlert = "Can we use your child's drawings? If so, please click the box above to start drawing!";
 var ageAlert = "Please select your age group.";
+var idAlert = "Please enter a correctly formatted ID (two letters followed by three digits)";
 
 // set global variables
 var clickedSubmit=0; // whether an image is submitted or not
@@ -265,6 +266,21 @@ function progress(timeleft, timetotal, $element) {
     }
 };
 
+function modeSpecificIDs() {
+    let current_data = {}
+    if (mode != "birch") {
+        var age = $('.active').attr('id');
+        current_data = {
+            age: age
+        }
+    } else {
+        var id = $("#participantID").val().trim();
+        current_data = {
+            participantID: id
+        }
+    }
+    return current_data
+}
 // saving data functions
 function saveSketchData(){
     // saves data at the end of trial
@@ -285,8 +301,7 @@ function saveSketchData(){
 
     // get critical trial variables
     var category = stimListTest[curTrial].category;
-    var age = $('.active').attr('id');
-
+    current_data = modeSpecificIDs()
     // test stirng
     readable_date = new Date();
     current_data = {
@@ -301,7 +316,7 @@ function saveSketchData(){
                 endTrialTime: Date.now(), // when trial was complete, e.g., now
                 startTrialTime: startTrialTime, // when trial started, global variable
                 date: readable_date,
-                age: age};
+                ...current_data};
 
     // send data to server to write to database
     socket.emit('current_data', current_data);
@@ -332,8 +347,7 @@ function showConsentPage(){
 
 function restartExperiment() {
    
-   var age = $('.active').attr('id'); // only active button from first page
-   
+   current_data = modeSpecificIDs()
    // send survey participation data
    var parent_drew = document.getElementById("survey_parent").checked
    var child_drew = document.getElementById("survey_child").checked
@@ -349,13 +363,13 @@ function restartExperiment() {
                 colname: version, 
                 location: mode,
                 date: readable_date,
-                age: age};
+                ...current_data};
 
     // send data to server to write to database
     socket.emit('current_data', current_data);
     console.log('sending survey data')
+    window.location.href = defaultLocation;
     
-    window.location.href="https://stanford-cogsci.org:8880/landing_page.html" // load back to regular landing page
 }
 
 function endExperiment(){
@@ -379,18 +393,31 @@ function increaseTrial(){
 //////////////////////////////////////////////////////////////////////////////
 
 window.onload = function() {
-    $.get("/mode", function(data){
+    $.get("/kiddraw/mode", function(data){
         mode = data.mode;
-        if(mode=='Bing') {
-            consentPage = '#consentBing';
-            thanksPage = "#thanksBing";
-            console.log(" mode Bing")
-        }else if(mode=="CDM"){
-            consentPage = '#consentCDM';
-            thanksPage = "#thanksPage";
-            console.log("mode CDM")
-        }
+        fetch(window.location.href).then(res => {
+            let header_mode = res.headers.get('X-App-Mode');
+            if (header_mode) {
+                console.log("Client mode:", header_mode);
+                mode = header_mode
+            }
+            if(mode=='Bing') {
+                consentPage = '#consentBing';
+                thanksPage = "#thanksBing";
+                console.log(" mode Bing")
+            }else if(mode=="CDM"){
+                consentPage = '#consentCDM';
+                thanksPage = "#thanksPage";
+                console.log("mode CDM")
+            } else if(mode == "birch"){
+                document.querySelector('#landingPage .logo-text').textContent = "Visual Learning Lab";
+                defaultLocation = "https://ucsdlearninglabs.org/kiddraw?mode=birch"
+                consentPage = '#consentBirch';
+                thanksPage = "#thanksBirch";
+            }
+        });
     });
+    
 
     /////////////// GENERAL BUTTON FUNCTIONS ///////////////
     document.ontouchmove = function(event){
@@ -425,15 +452,24 @@ window.onload = function() {
                 startDrawing();
             }
 
-        }else{
+        }else if (mode == "CDM"){
             console.log("CDM");
-            if (!$("#checkConsent").is(':checked')) {
+            console.log(mode)
+            if ((!$("#checkConsent").is(':checked'))) {
                 alert(checkBoxAlert)
             }else if($(".active").val()==undefined){
                 alert(ageAlert)
             }
             else {
                 startDrawing();
+            }
+        } else {
+            console.log("Birch")
+            var id = $("#participantID").val().trim();
+            if (id === "" || !/^[A-Za-z]{2}\d{3}$/.test(id)) {
+                alert(idAlert);
+            } else {
+                startDrawing()
             }
         }
 
@@ -525,7 +561,7 @@ window.onload = function() {
         var svgString = path.exportSVG({asString: true});
         var category = stimListTest[curTrial].category;
         var readable_date = new Date();
-        var age = $('.active').attr('id');
+        stroke_data = modeSpecificIDs()
         
         console.log('time since we started the trial')
         console.log(endStrokeTime - startTrialTime)
@@ -545,7 +581,7 @@ window.onload = function() {
             startStrokeTime: startStrokeTime,
             endStrokeTime: endStrokeTime,
             date: readable_date,
-            age: age};
+            ...stroke_data};
 
         // send stroke data to server
         console.log(stroke_data)
@@ -634,7 +670,7 @@ window.onload = function() {
     var refreshTime = 120000
     function refresh() {
         if (new Date().getTime() - time >= refreshTime) {
-                window.location.href="https://stanford-cogsci.org:8880/landing_page.html"
+                window.location.href=defaultLocation
                 console.log("No user activities. Reload.")
         } else {
             setTimeout(refresh, refreshTime);

@@ -85,6 +85,10 @@ var serveFile = function(req, res) {
 
     }else{
         console.log('\t :: Express :: file requested: ' + fileName);
+        if (req.query.mode) {
+            res.set('X-App-Mode', req.query.mode);  
+            console.log('Query mode set in header:', req.query.mode);
+        }
         return res.sendFile(fileName, {root: __dirname});
     }
 
