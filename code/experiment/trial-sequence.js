@@ -12,13 +12,19 @@ const socket = io.connect('/', {
 });
 
 // 1. Setup trial order and randomize it!
-firstTrial = {"category": "this square", "video": "copy_square.mp4", "image":"images/square.png"}
-trace1 = {"category":"square", "video": "trace_square.mp4", "image":"images/square.png"}
-trace2 = {"category":"shape", "video": "trace_shape.mp4","image":"images/shape.png"}
-intro = {"category":"intro", "video": "intro.mp4","image":"images/lab_logo_stanford.png"}
-lastTrial =  {"category": "museum", "video": "museum.mp4"}
+const firstTrial = {"category": "this square", "video": "copy_square.mp4", "image":"images/square.png"}
+const trace1 = {"category":"square", "video": "trace_square.mp4", "image":"images/square.png"}
+const trace2 = {"category":"shape", "video": "trace_shape.mp4","image":"images/shape.png"}
+const intro = {"category":"intro", "video": "intro.mp4","image":"images/lab_logo_stanford.png"}
+const audioCheck = {"category":"audio"}
+const lastTrial =  {"category": "museum", "video": "museum.mp4"}
 
-var stimListTest = [{"category": "a crab", "video": "crab.mp4"},
+var trialType = "drawing" //knowledge or drawing
+var zorpCue = "Let's teach Zorpie about some sea creatures!"
+var zorpHello = "First, can you say 'Hi, Zorpie!'?"
+var zorpTeach = "Let's teach Zorpie what we know about "
+
+var cdmStimList = [{"category": "a crab", "video": "crab.mp4"},
     {"category": "a crocodile", "video": "crocodile.mp4"},
     {"category": "a duck", "video": "duck.mp4"},
     {"category": "a giraffe", "video": "giraffe.mp4"},
@@ -27,16 +33,33 @@ var stimListTest = [{"category": "a crab", "video": "crab.mp4"},
     {"category": "a panda", "video": "panda.mp4"},
     {"category": "a truck", "video": "truck.mp4"}]
 
-var stimListTest = shuffle(stimListTest)
-stimListTest.unshift(firstTrial)
-stimListTest.unshift(trace2)
-stimListTest.unshift(trace1)
-stimListTest.unshift(intro)
-stimListTest.push(lastTrial)
+var birchStimList = [
+    {"category": "a penguin"},
+    {"category": "a whale"},
+    {"category": "a shark"},
+    {"category": "a seahorse"},
+    {"category": "a turtle"},
+    {"category": "a fish"},
+    {"category": "an octopus"},
+    {"category": "a crab"},
+]
 
+var knowledgeLang = {
+    "a penguin": "penguins",
+    "a whale": "whales",
+    "a shark": "sharks",
+    "a seahorse": "seahorses",
+    "a turtle": "turtles",
+    "a fish": "fish",
+    "an octopus": "octopuses",
+    "a crab": "crabs"
+}
+
+
+var stimListTest = []
 var curTrial=0 // global variable, trial counter
-var maxTrials = stimListTest.length; //
-var defaultLocation = "https://ucsdlearninglabs.org/kiddraw?mode=birch"
+var maxTrials = stimListTest.length; 
+var defaultLocation = "https://ucsdlearninglabs.org/kiddraw/"
 
 var stimLang = {
     "this square": "this square",
@@ -56,8 +79,11 @@ var cuesLang = {
     "trace": "Can you trace the ",
     "copy": "Can you copy ",
     "draw": "Can you draw ",
+    "drawEndZorp": " for Zorpie",
+    "teachZorp": "Can you tell Zorpie what you know about ",
     "endQuestion": " ?"
 }
+
 var checkBoxAlert = "Can we use your child's drawings? If so, please click the box above to start drawing!";
 var ageAlert = "Please select your age group.";
 var idAlert = "Please enter a correctly formatted ID (two letters followed by three digits)";
@@ -92,13 +118,31 @@ function shuffle (a)
     return o;
 }
 
+function setupStim() {
+    if (mode == "birch") {
+    stimListTest = shuffle(birchStimList)
+    } else {
+        stimListTest = shuffle(cdmStimList)
+    }
+    stimListTest.unshift(firstTrial)
+    stimListTest.unshift(trace2)
+    stimListTest.unshift(trace1)
+    stimListTest.unshift(intro)
+    if (mode != "birch") {
+        stimListTest.push(lastTrial)
+    } else {
+        stimListTest.splice(1, 0, audioCheck)
+        maxTraceTrial = maxTraceTrial + 1 //Plus 1 to accont for the audio check trial as well.
+    }
+    maxTrials = stimListTest.length;
+}
+
 // for each time we start drawings
 function startDrawing(){
     if (curTrial==0){
         $(consentPage).fadeOut('fast'); // fade out age screen
         showIntroVideo();  
-    }
-    else if (curTrial>0 && curTrial<maxTrials) {
+    } else if (curTrial>0 && curTrial<maxTrials) {
         if (curTrial == maxTraceTrial){
             tracing = false
             $('#sketchpad').css('background-image','');
@@ -110,44 +154,120 @@ function startDrawing(){
     }
 }
 
-
-function showIntroVideo(){
-    var player = loadNextVideo(curTrial); // change video
-    document.getElementById("cue").innerHTML = "This game is for only one person at a time. Please draw by yourself!";
-    setTimeout(function() {showCue();},1000);
-    setTimeout(function() {playVideo(player);},1000);
+function startTrialPostCue() {
+    console.log('cue ends and trial starts');
+    $(".cue").hide();
+    $('#cueAudioDiv').hide();
+    $("#cueGif").hide();
+    setTimeout(function(){
+        setUpDrawing(); // set up the drawing canvas
+    }, 100);
 }
 
+function showIntroVideo(){
+    if (mode != "birch") {
+        var player = loadNextVideo(curTrial); // change video
+        document.querySelector(".cue").innerHTML = "This game is for only one person at a time. Please draw by yourself!";
+    } else {
+        document.querySelector(".cue").innerHTML = zorpCue;
+        document.querySelector("#audioGif").src = "zorpie/zorpie_confused.gif"
+        $("#gifContainer").fadeIn()
+    }
+    setTimeout(function() {showCue();},250);
+    if (mode != "birch") {
+        setTimeout(function() {playVideo(player);},1000);
+    } else {
+        $("#trialContinuer").fadeIn();
+    }
+}
+
+async function showAudioCheck() {
+    document.querySelector(".cue").innerHTML = zorpHello;
+    $(".cue").fadeIn()
+    document.querySelector("#audioGif").src = "zorpie/zorpie_wave_static.gif"
+    //document.querySelector("#audioGif").src = "zorpie/zorpie_wave.gif"
+    $("#gifContainer").fadeIn()
+    await startAudio();
+    setTimeout(function() {$("#trialContinuer").fadeIn();},1000);
+}
 
 // for the start of each trial
 function beginTrial(){
     //
-    var player = loadNextVideo(curTrial); // change video
+    if (mode != "birch") {
+        var player = loadNextVideo(curTrial); // change video
+    }
+    var categoryKey = stimListTest[curTrial].category;
+    var categoryName = stimLang[categoryKey] || categoryKey;  
+    var knowledgeName =  knowledgeLang[categoryKey] || categoryKey;
     if (tracing){
-        var traceCue = cuesLang["trace"]  + stimLang[stimListTest[curTrial].category] + cuesLang["endQuestion"];
-        document.getElementById("cue").innerHTML = traceCue;
+        document.querySelector("#audioGif").src = "zorpie/zorpie_happy.gif"
+        var traceCue = cuesLang["trace"]  + categoryName;
+        document.querySelector(".cue").innerHTML = traceCue;
         document.getElementById("drawingCue").innerHTML = traceCue;
     }else {
         if (stimListTest[curTrial].category == 'this square'){
-            var circleCue = cuesLang["copy"]  + stimLang[stimListTest[curTrial].category] + cuesLang["endQuestion"];
-            document.getElementById("cue").innerHTML = circleCue;
+            var circleCue = cuesLang["copy"]  + categoryName;
+            document.querySelector(".cue").innerHTML = circleCue;
             document.getElementById("drawingCue").innerHTML = circleCue;
         }else{
-            document.getElementById("cue").innerHTML = cuesLang["draw"] + stimLang[stimListTest[curTrial].category] + cuesLang["endQuestion"]; // change cue
-            document.getElementById("drawingCue").innerHTML = stimLang[stimListTest[curTrial].category]; // change drawing cue
+            // show knowledge cue
+            document.getElementById("drawingCue").innerHTML = categoryName; // change drawing cue
+            if (trialType == "drawing") {
+                document.querySelector(".cue").innerHTML = cuesLang["draw"] + categoryName; // change cue
+            } else {
+                document.querySelector(".cue").innerHTML = cuesLang["teachZorp"] + knowledgeName + cuesLang["endQuestion"];
+                document.querySelector("#audioGif").src = "zorpie/zorpie_happy.gif"
+                document.getElementById("knowledgeCue").innerHTML = categoryName; 
+            }
         }
-
+    }
+    let currCue = document.querySelector(".cue").innerHTML
+    if (mode != "birch") {
+        document.querySelector(".cue").innerHTML = currCue + cuesLang["endQuestion"];
+    } else if (trialType == "drawing") {
+        document.querySelector(".cue").innerHTML = currCue + cuesLang["drawEndZorp"] + cuesLang["endQuestion"];
     }
     setTimeout(function() {showCue();},1000);
-    setTimeout(function() {playVideo(player);},1000);
+    if (mode != "birch") {
+        setTimeout(function() {playVideo(player);},1000);
+    } 
 }
 
 // show cue without drawing canvas
 function showCue() {
     $('#mainExp').fadeIn('fast'); // fade in exp
-    $('#cue').fadeIn('fast'); // text cue associated with trial
+    $('.cue').fadeIn('fast'); // text cue associated with trial
+    if (mode == "birch") {
+        $('#cueVideoDiv').hide()
+        $("#trialContinuer").fadeIn('fast');
+        $("#gifContainer").fadeIn('fast')
+    }
 }
 
+async function fullKnowledgeSetup() {
+    $('.cue').hide()
+    $('#knowledge').fadeIn()
+    gifID = ".knowledgeZorpie"
+    await startAudio();
+    monitorProgress();
+}
+
+function fullDrawingSetup() {
+    $('#cueVideoDiv').fadeOut();
+    setTimeout(function(){
+        $('.cue').hide(); // fade out cue
+        if (curTrial==0 || (curTrial == 1 & mode == 'birch')) { // after intro
+            console.log('starting first trial')
+            curTrial = curTrial + 1
+            setTimeout(function() {beginTrial()}, 250);  /// start trial sequence after intro trial
+        }
+        else{ /// if not on introductory trial
+            setUpDrawing(); // set up the drawing canvas
+        }
+        $("#cueVideoDiv").html("<video id='cueVideo' class='video-js' playsinline> </video>");
+    }, 125);
+}
 // video player functions
 function playVideo(player){
     $('#cueVideoDiv').fadeIn(); // show video div
@@ -155,21 +275,8 @@ function playVideo(player){
         this.play();
         this.on('ended',function(){
             console.log('video ends and drawing starts');
-            $('#cueVideoDiv').fadeOut();
-            setTimeout(function(){
-                $('#cue').hide(); // fade out cue
-                player.dispose(); //dispose the old video and related eventlistener. Add a new video
-                if (curTrial==0) { // after intro
-                    console.log('starting first trial')
-                    curTrial = curTrial + 1
-                    setTimeout(function() {beginTrial();},1000); /// start trial sequence after intro trial
-                }
-                else{ /// if not on introductory trial
-                    setUpDrawing(); // set up the drawing canvas
-                }
-                $("#cueVideoDiv").html("<video id='cueVideo' class='video-js' playsinline> </video>");
-            }, 500);
-
+            player.dispose(); //dispose the old video and related eventlistener. Add a new video
+            fullDrawingSetup()
         });
     });
 }
@@ -225,6 +332,7 @@ function setUpDrawing(){
 
 function monitorProgress(){
     clickedSubmit=0;
+    $(".progress").fadeIn();
     startTrialTime=Date.now()
     console.log('starting monitoring')
     progress(timeLimit, timeLimit, $('.progress')); // show progress bar
@@ -248,13 +356,15 @@ function progress(timeleft, timetotal, $element) {
     }
     else if(timeleft == 0 & clickedSubmit==0){
         console.log("trial timed out")
-        increaseTrial();
-        clickedSubmit = 1 // it's as if we clicked submit
         disableDrawing = true // can't draw after trial timed out
-        if($("#lastTrial").css("display")!="none"){
-            $('#endGame').addClass('bounce')
-        }else {
+        if(curTrial == maxTrials-1){
+            $('.endGame').addClass('bounce')
+        }else if (trialType == "drawing") {
             $('#keepGoing').addClass('bounce')
+            increaseTrial();
+            clickedSubmit = 1 // it's as if we clicked submit
+        }else {
+            $('#keepGoingToDrawing').addClass('bounce')
         }
         $("#sketchpad").css({"background":"linear-gradient(#17a2b81f, #17a2b81f)", "opacity":"0.5"});
         return; //  get out of here
@@ -281,6 +391,46 @@ function modeSpecificIDs() {
     }
     return current_data
 }
+
+async function saveAudioData() {
+    console.log("Saving audio data")
+    console.log(audioChunks)
+    if (!audioChunks || audioChunks.length === 0) {
+        console.warn("No audio data to save.");
+    }
+    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+  // Convert to Base64
+  let dataURL = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(audioBlob);
+  });
+  dataURL = dataURL.split(",")[1]
+     // get critical trial variables
+     var category = stimListTest[curTrial].category;
+     current_data = modeSpecificIDs()
+     // test stirng
+     readable_date = new Date();
+     current_data = {
+                 dataType: 'knowledge',
+                 sessionId: sessionId, // each child
+                 audioData: dataURL,
+                 category: category, // drawing category
+                 dbname:'kiddraw',
+                 colname: version, 
+                 location: mode,
+                 trialNum: curTrial,
+                 endTrialTime: Date.now(), // when trial was complete, e.g., now
+                 startTrialTime: startTrialTime, // when trial started, global variable
+                 date: readable_date,
+                 ...current_data};
+    const jsonStr = JSON.stringify(current_data);
+    console.log('Payload size:', new TextEncoder().encode(jsonStr).length, 'bytes');                 
+     // send data to server to write to database
+    await writeDataToMongo(current_data)
+}
+
 // saving data functions
 function saveSketchData(){
     // saves data at the end of trial
@@ -373,7 +523,17 @@ function restartExperiment() {
 }
 
 function endExperiment(){
-    $(thanksPage).show();
+    $('#drawing').hide();
+    $("#knowledge").hide();
+    $(".progress").hide();
+    document.querySelector(".cue").innerHTML = "Good job! You're all done!"
+    $(".cue").fadeIn('fast');
+    document.querySelector("#audioGif").style.maxWidth = "70vh";
+    document.querySelector("#audioGif").src = "zorpie/zorpie_stars.gif"
+    $("#gifContainer").fadeIn('fast');
+    setTimeout(function() {
+        $('#mainExp').hide();
+        $(thanksPage).show();
     curTrial = -1;
     // wait for 1min and restart entire experiment
     setTimeout(function(){
@@ -382,6 +542,7 @@ function endExperiment(){
             restartExperiment()
         }
     }, 60000);
+    }, 6000) 
 }
 
 function increaseTrial(){
@@ -414,7 +575,10 @@ window.onload = function() {
                 defaultLocation = "https://ucsdlearninglabs.org/kiddraw?mode=birch"
                 consentPage = '#consentBirch';
                 thanksPage = "#thanksBirch";
+                version = "birch_run_v1"
+                //$('.cue').attr('id', 'audioCue');
             }
+            setupStim();
         });
     });
     
@@ -479,7 +643,9 @@ window.onload = function() {
     $('#keepGoing').bind('touchstart mousedown',function(e) {
         e.preventDefault()
         $('#keepGoing').removeClass('bounce')
-
+        if (mode == "birch" && !tracing){ 
+            trialType = "knowledge"
+        }
         console.log('touched next trial button');
         if(clickedSubmit==0){// if the current trial has not timed out yet
             clickedSubmit=1; // indicate that we submitted - global variable
@@ -487,8 +653,50 @@ window.onload = function() {
         }
 
         $('#drawing').hide(); // hide the canvas
+        $(".progress").hide();
         project.activeLayer.removeChildren(); // clear the canvas
         startDrawing(); // start the new trial
+    });
+
+    $('#keepGoingToDrawing').bind('touchstart mousedown',async function(e) {
+        e.preventDefault()
+        $(".knowledgeButton").hide()
+        $(".progress").hide();
+        $(".knowledgeZorpie").attr("src", "zorpie/zorpie_stars.gif");
+        trialType = "drawing"
+        console.log('touched next trial button after knowledge task');
+        await saveAudioData();
+        setTimeout(async function() {
+            await stopAudio();
+        if(clickedSubmit==0){// if the current trial has not timed out yet
+            clickedSubmit=1; // indicate that we submitted - global variable
+        }
+        setTimeout(function() {
+            $('#keepGoingToDrawing').removeClass('bounce')
+        
+            $('#knowledge').hide(); // hide the canvas
+            $('.knowledgeButton').fadeIn()
+            startDrawing();
+        }, 2000);
+        }, 500)
+    
+    });
+
+    $('.submitCue').bind('touchstart mousedown', async function(e) {
+        e.preventDefault()
+        $("#trialContinuer").fadeOut('fast');
+        $("#gifContainer").fadeOut('fast');
+        $(".cue").fadeOut('fast');
+        await stopAudio()
+        if (curTrial == 0 && mode == 'birch') {
+            curTrial = curTrial + 1;
+            setTimeout(async function() {await showAudioCheck()}, 150);
+        } else if (trialType == "drawing") {
+            setTimeout(function() {fullDrawingSetup()}, 150);
+        } else {
+            document.querySelector(".knowledgeZorpie").src = "zorpie/zorpie_happy_static.gif"
+            setTimeout(function() {fullKnowledgeSetup()}, 150);
+        } 
     });
 
     $('.allDone').bind('touchstart mousedown',function(e) {
@@ -500,8 +708,7 @@ window.onload = function() {
             clickedSubmit=1; // indicate that we submitted - global variable
             increaseTrial(); // save data and increase trial counter
         }
-        $('#mainExp').hide();
-        $('#drawing').hide();
+        //$('#mainExp').hide();
         $('#keepGoing').removeClass('bounce')
         endExperiment();
 
@@ -684,6 +891,102 @@ window.onload = function() {
 
 } // on document load
 
+ /////////////// AUDIO PARAMETERS AND FUNCTIONS ///////////////
+ let audioChunks = [];
+ let mediaRecorder;
+ let analyzer, dataArray, audioContext;
+ let audioStillGoing = true;
+ let staticGifTimeout = null;
+ let lastBarWidth = 0;
+ let gifID = "#audioGif"
+
+ async function setupAudio() {
+     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+     mediaRecorder = new MediaRecorder(stream);
+     audioChunks = [];
+     mediaRecorder.ondataavailable = (event) => {
+         audioChunks.push(event.data);
+         console.log(audioChunks)
+     };
+     audioContext = new AudioContext();
+     const source = audioContext.createMediaStreamSource(stream);
+     analyzer = audioContext.createAnalyser();
+     analyzer.fftSize = 512;
+     dataArray = new Uint8Array(analyzer.frequencyBinCount);
+     source.connect(analyzer);
+     detectSound();
+ } 
+
+ function detectSound() {
+     analyzer.getByteTimeDomainData(dataArray);
+     let sum = 0;
+     for (let i = 0; i < dataArray.length; i++) {
+       const val = dataArray[i] - 128;
+       sum += val * val;
+     }
+     const volume = Math.sqrt(sum / dataArray.length);
+     const volumeBar = document.querySelector("#volumeBar");
+     const gifEl = document.querySelector(gifID);
+     if (volume > 8 && !gifEl.src.includes("stars")) { // stars indicates that trial is over but data is still being saved
+       console.log('🎙️ Sound Detected!');
+       if (gifEl.src.includes("_static")) {
+        gifEl.src = gifEl.src.replace("_static", "");
+         }
+        clearTimeout(staticGifTimeout);
+            staticGifTimeout = setTimeout(() => {
+                if (!gifEl.src.includes("stars")) {
+                    gifEl.src = gifEl.src.replace(/\.gif$/, "_static.gif");
+                }
+            staticGifTimeout = null;
+          }, 2000);
+     } 
+     const newBarWidth = Math.min(100, Math.round(volume * 3));
+     const diff = Math.abs(newBarWidth - lastBarWidth);
+     if (diff >= 10) {
+        volumeBar.style.width = `${newBarWidth}%`;
+        lastBarWidth = newBarWidth;
+     }
+     if (audioStillGoing) {
+        requestAnimationFrame(detectSound);
+     }
+   }
+
+ async function startAudio() {
+    $("#volumeMeter").fadeIn()
+    audioStillGoing = true;
+    gifTimeout = null;
+     await setupAudio();
+     mediaRecorder.start(1000);
+ }
+
+ async function stopAudio() {
+    $("#volumeMeter").fadeOut()
+    audioStillGoing = false;
+    if (mediaRecorder) {
+        console.log("stopped audio")
+        mediaRecorder.stop();
+        console.log(audioChunks)
+    }
+ }
+ const writeDataToMongo = async function(data) {
+    try {
+        const res = await fetch('/api/db/insert', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        const body = await res.text(); // or res.json() if expecting JSON
+
+        if (res.ok) {
+            console.log(`sent data to store`);
+        } else {
+            console.log(`error sending data to store: ${res.status} ${body}`);
+        }
+    } catch (error) {
+        console.log(`network error: ${error}`);
+    }
+};
 
 
 

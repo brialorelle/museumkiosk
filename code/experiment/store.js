@@ -10,6 +10,9 @@ const sendPostRequest = require('request').post;
 const colors = require('colors/safe');
 
 const app = express();
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true, parameterLimit:50000 }));
+
 const MongoClient = mongodb.MongoClient;
 const port = 9001;
 const mongoCreds = require('./mongo_auth.json');
@@ -55,10 +58,6 @@ function mongoConnectWithRetry(delayInMilliseconds, callback) {
 function serve() {
 
   mongoConnectWithRetry(2000, (connection) => {
-
-    app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({ extended: true }));
-
     app.post('/db/insert', (request, response) => {
       if (!request.body) {
         return failure(response, '/db/insert needs post request body');

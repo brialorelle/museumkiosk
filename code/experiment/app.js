@@ -6,6 +6,7 @@ var
     https         = require('https'),
     fs            = require('fs'),
     app           = require('express')(),
+    bodyParser = require('body-parser');
     _             = require('lodash'),
     parser        = require('xmldom').DOMParser,
     XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest,
@@ -13,7 +14,8 @@ var
     nodemailer = require('nodemailer');
 
 var gameport;
-
+app.use(bodyParser.json({ limit: '10mb' })); 
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true, parameterLimit:50000 }));
 const gmailCreds = require('./gmail_creds.json');
 require('dotenv/config');
 

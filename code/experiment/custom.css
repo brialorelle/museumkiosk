@@ -259,6 +259,18 @@ button[disabled] {
     font-family: Schoolbell,cursive;
 }
 
+#knowledgeCue{
+    font-size: 3vw;
+    text-align:center;
+    left: 0;
+    right: 0;
+    margin: auto;
+    margin-bottom:1vh;
+    margin-top:2vh;
+    font-family: Schoolbell,cursive;
+}
+
+
 #aroundSketchpad {
     display: flex;
     text-align: center;
@@ -286,6 +298,10 @@ button[disabled] {
     bottom:0;
     margin:auto;
     touch-action: none;
+}
+
+#audioGif {
+    max-width: 40vh;
 }
 
 .vjs-hidden-player {
@@ -470,15 +486,16 @@ button[disabled] {
 }
 
 .bounce {
-  -webkit-animation:bounce 1s infinite;
-}
-
-@-webkit-keyframes bounce {
-  0%       { bottom:5px; }
-  25%, 75% { bottom:15px; }
-  50%      { bottom:20px; }
-  100%     {bottom:0;}
-}
+    animation: bounceTransform 1.2s infinite ease-in-out;
+  }
+  
+  @keyframes bounceTransform {
+    0%   { transform: translateY(0); }
+    25%  { transform: translateY(-40px); }
+    50%  { transform: translateY(-60px); }
+    75%  { transform: translateY(-40px); }
+    100% { transform: translateY(0); }
+  }
 
 .nameInput{
     width: 30vw;
@@ -602,6 +619,13 @@ button[disabled] {
     margin-top: 2vw;
 }
 
+#trialContinuer {
+    max-height: 60%;
+    margin: auto;
+    justify-content: center;
+    margin-top: 1vh;
+}
+
 .cueButton {
     text-align: center;
     padding: 2vw 8vw;
@@ -609,8 +633,18 @@ button[disabled] {
     cursor: pointer;
 }
 
+#trialContinuer .cueButton {
+    max-width: 30vw;
+    margin: auto;
+    padding-right: 10vw;
+}
+
 .cueButton img {
     width: 100%;
     max-width: 280px;
     height: auto;
+}
+
+.knowledgeZorpie {
+    height: 70vh;
 }
