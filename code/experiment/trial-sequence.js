@@ -20,7 +20,7 @@ const audioCheck = {"category":"audio"}
 const lastTrial =  {"category": "museum", "video": "museum.mp4"}
 
 var trialType = "drawing" //knowledge or drawing
-var zorpCue = "Let's teach Zorpie about some sea creatures!"
+var zorpCue = "Let's teach Zorpie about some sea creatures! Zorpie has never seen any sea creatures before!"
 var zorpHello = "First, can you say 'Hi, Zorpie!'?"
 var zorpTeach = "Let's teach Zorpie what we know about "
 
@@ -33,13 +33,12 @@ var cdmStimList = [{"category": "a crab", "video": "crab.mp4"},
     {"category": "a panda", "video": "panda.mp4"},
     {"category": "a truck", "video": "truck.mp4"}]
 
+var birchTutorial =  {"category": "a penguin"}
 var birchStimList = [
-    {"category": "a penguin"},
     {"category": "a whale"},
     {"category": "a shark"},
     {"category": "a seahorse"},
     {"category": "a turtle"},
-    {"category": "a fish"},
     {"category": "an octopus"},
     {"category": "a crab"},
 ]
@@ -80,7 +79,8 @@ var cuesLang = {
     "copy": "Can you copy ",
     "draw": "Can you draw ",
     "drawEndZorp": " for Zorpie",
-    "teachZorp": "Can you tell Zorpie what you know about ",
+    "teachZorp": "Can you tell Zorpie what ",
+    "teachEndZorp": " look like",
     "endQuestion": " ?"
 }
 
@@ -121,6 +121,7 @@ function shuffle (a)
 function setupStim() {
     if (mode == "birch") {
     stimListTest = shuffle(birchStimList)
+    stimListTest.unshift(birchTutorial)
     } else {
         stimListTest = shuffle(cdmStimList)
     }
@@ -184,6 +185,7 @@ function showIntroVideo(){
 async function showAudioCheck() {
     document.querySelector(".cue").innerHTML = zorpHello;
     $(".cue").fadeIn()
+    document.querySelector("#audioGif").style.maxWidth = "40vh"
     document.querySelector("#audioGif").src = "zorpie/zorpie_wave_static.gif"
     //document.querySelector("#audioGif").src = "zorpie/zorpie_wave.gif"
     $("#gifContainer").fadeIn()
@@ -210,13 +212,13 @@ function beginTrial(){
             var circleCue = cuesLang["copy"]  + categoryName;
             document.querySelector(".cue").innerHTML = circleCue;
             document.getElementById("drawingCue").innerHTML = circleCue;
-        }else{
+        } else{
             // show knowledge cue
             document.getElementById("drawingCue").innerHTML = categoryName; // change drawing cue
             if (trialType == "drawing") {
                 document.querySelector(".cue").innerHTML = cuesLang["draw"] + categoryName; // change cue
             } else {
-                document.querySelector(".cue").innerHTML = cuesLang["teachZorp"] + knowledgeName + cuesLang["endQuestion"];
+                document.querySelector(".cue").innerHTML = cuesLang["teachZorp"] + knowledgeName + cuesLang["teachEndZorp"] + cuesLang["endQuestion"];
                 document.querySelector("#audioGif").src = "zorpie/zorpie_happy.gif"
                 document.getElementById("knowledgeCue").innerHTML = categoryName; 
             }
@@ -663,14 +665,14 @@ window.onload = function() {
         $(".knowledgeButton").hide()
         $(".progress").hide();
         $(".knowledgeZorpie").attr("src", "zorpie/zorpie_stars.gif");
-        trialType = "drawing"
         console.log('touched next trial button after knowledge task');
-        await saveAudioData();
+        if (clickedSubmit == 0) {
+            clickedSubmit=1;// if the current trial has not timed out yet
+            await saveAudioData();// indicate that we submitted - global variable
+        }
+        trialType = "drawing"
         setTimeout(async function() {
             await stopAudio();
-        if(clickedSubmit==0){// if the current trial has not timed out yet
-            clickedSubmit=1; // indicate that we submitted - global variable
-        }
         setTimeout(function() {
             $('#keepGoingToDrawing').removeClass('bounce')
         
