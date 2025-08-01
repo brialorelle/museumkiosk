@@ -486,7 +486,7 @@ button[disabled] {
 }
 
 .bounce {
-    animation: bounceTransform 1.2s infinite ease-in-out;
+    animation: bounceTransform 1.2s infinite;
   }
   
   @keyframes bounceTransform {

@@ -79,8 +79,7 @@ var cuesLang = {
     "copy": "Can you copy ",
     "draw": "Can you draw ",
     "drawEndZorp": " for Zorpie",
-    "teachZorp": "Can you tell Zorpie what ",
-    "teachEndZorp": " look like",
+    "teachZorp": "Zorpie is trying to imagine [item] in his head. He's never seen [item] before! Can you help him imagine it",
     "endQuestion": " ?"
 }
 
@@ -217,10 +216,15 @@ function beginTrial(){
             document.getElementById("drawingCue").innerHTML = categoryName; // change drawing cue
             if (trialType == "drawing") {
                 document.querySelector(".cue").innerHTML = cuesLang["draw"] + categoryName; // change cue
+                document.querySelector(".cue").style.fontSize = "5vw"
             } else {
-                document.querySelector(".cue").innerHTML = cuesLang["teachZorp"] + knowledgeName + cuesLang["teachEndZorp"] + cuesLang["endQuestion"];
+                document.querySelector(".cue").innerHTML = cuesLang["teachZorp"].replaceAll("[item]", categoryName) + cuesLang["endQuestion"];
+                document.querySelector(".cue").style.fontSize = "4vw"
                 document.querySelector("#audioGif").src = "zorpie/zorpie_happy.gif"
                 document.getElementById("knowledgeCue").innerHTML = categoryName; 
+            }
+            if (categoryName == "a penguin") {
+                document.querySelector(".cue").innerHTML = document.querySelector(".cue").innerHTML.replaceAll("you", "we")
             }
         }
     }
@@ -358,17 +362,26 @@ function progress(timeleft, timetotal, $element) {
     }
     else if(timeleft == 0 & clickedSubmit==0){
         console.log("trial timed out")
-        disableDrawing = true // can't draw after trial timed out
         if(curTrial == maxTrials-1){
             $('.endGame').addClass('bounce')
         }else if (trialType == "drawing") {
             $('#keepGoing').addClass('bounce')
-            increaseTrial();
-            clickedSubmit = 1 // it's as if we clicked submit
         }else {
             $('#keepGoingToDrawing').addClass('bounce')
         }
-        $("#sketchpad").css({"background":"linear-gradient(#17a2b81f, #17a2b81f)", "opacity":"0.5"});
+        let currentTrial = curTrial
+        if (trialType == "drawing") {
+            setTimeout(function () {
+                // if the participant is still on the current trial
+                if (timeleft == 0 & clickedSubmit == 0 & trialType == "drawing" & currentTrial == curTrial) {
+                    console.log("graying out")
+                    increaseTrial();
+                    clickedSubmit = 1 // it's as if we clicked submit
+                    disableDrawing = true // can't draw after trial timed out
+                    $("#sketchpad").css({"background":"linear-gradient(#17a2b81f, #17a2b81f)", "opacity":"0.5"});    
+                }
+            }, 10000)
+        }
         return; //  get out of here
     }
     else if (clickedSubmit==1){
