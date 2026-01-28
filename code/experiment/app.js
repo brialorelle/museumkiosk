@@ -32,7 +32,7 @@ if(argv.mode) {
     mode = argv.mode;
     console.log('using mode ' + mode);
 } else {
-    mode = "CDM";
+    mode = "CDM_hybrid";
     console.log('no mode specified: using CDM\nUse the --mode flag to change');
 }
 

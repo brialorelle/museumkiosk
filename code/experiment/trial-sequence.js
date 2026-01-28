@@ -23,6 +23,7 @@ var trialType = "drawing" //knowledge or drawing
 var zorpCue = "Let's teach Zorpie about some sea creatures! Zorpie has never seen any sea creatures before!"
 var zorpHello = "First, can you say 'Hi, Zorpie!'?"
 var zorpTeach = "Let's teach Zorpie what we know about "
+var hybridTutorial = {"category" : "tutorial_hybrid", "video": "makebelieve.mp4"}
 
 var cdmStimList = [{"category": "a crab", "video": "crab.mp4"},
     {"category": "a crocodile", "video": "crocodile.mp4"},
@@ -33,6 +34,16 @@ var cdmStimList = [{"category": "a crab", "video": "crab.mp4"},
     {"category": "a panda", "video": "panda.mp4"},
     {"category": "a truck", "video": "truck.mp4"}]
 
+var cdmHybridStimList = [{"category": "a dinosaur truck", "video": "dinotruck.mp4"},
+    {"category": "a tiger frog", "video": "tigerfrog.mp4"},
+    {"category": "a train cat", "video": "traincat.mp4"},
+    {"category": "a rabbit boat", "video": "rabbitboat.mp4"},
+    {"category": "a mushroom house", "video": "mushroomhouse.mp4"},
+    {"category": "a sheep fish", "video": "sheepfish.mp4"},
+    {"category": "a bike bee", "video": "bikebee.mp4"},
+    {"category": "an elephant snail", "video": "elephantsnail.mp4"}
+]
+var hybridBasicDraw = {"category": "a dog", "video": "dog.mp4"} 
 var birchTutorial =  {"category": "a penguin"}
 var birchStimList = [
     {"category": "a whale"},
@@ -79,6 +90,7 @@ var cuesLang = {
     "copy": "Can you copy ",
     "draw": "Can you draw ",
     "drawEndZorp": " for Zorpie",
+    "tutorial_hybrid": "Now it's time for some make-believe drawings! There's no right or wrong answer, just try your best.",
     "teachZorp": "Zorpie is trying to imagine [item] in his head. He's never seen [item] before! Can you help him imagine it",
     "endQuestion": " ?"
 }
@@ -121,16 +133,22 @@ function setupStim() {
     if (mode == "birch") {
     stimListTest = shuffle(birchStimList)
     stimListTest.unshift(birchTutorial)
-    } else {
-        stimListTest = shuffle(cdmStimList)
+    } else if (mode == "CDM_hybrid") {
+            stimListTest = shuffle(cdmHybridStimList)
+            // adding intro video
+            stimListTest.unshift(hybridTutorial)
+            // adding dog drawing
+            stimListTest.unshift(hybridBasicDraw)
+     } else {
+            stimListTest = shuffle(cdmStimList)
     }
     stimListTest.unshift(firstTrial)
     stimListTest.unshift(trace2)
     stimListTest.unshift(trace1)
     stimListTest.unshift(intro)
-    if (mode != "birch") {
+    if (mode != "birch" && mode != "CDM_hybrid") {
         stimListTest.push(lastTrial)
-    } else {
+    } else if (mode == "birch") {
         stimListTest.splice(1, 0, audioCheck)
         maxTraceTrial = maxTraceTrial + 1 //Plus 1 to accont for the audio check trial as well.
     }
@@ -207,11 +225,15 @@ function beginTrial(){
         document.querySelector(".cue").innerHTML = traceCue;
         document.getElementById("drawingCue").innerHTML = traceCue;
     }else {
-        if (stimListTest[curTrial].category == 'this square'){
+        if (categoryKey == 'this square'){
             var circleCue = cuesLang["copy"]  + categoryName;
             document.querySelector(".cue").innerHTML = circleCue;
             document.getElementById("drawingCue").innerHTML = circleCue;
-        } else{
+        } else if (categoryKey.includes('tutorial')) {
+            // using the category directly as a cue key
+            document.querySelector(".cue").innerHTML = cuesLang[categoryKey]
+        }
+          else{
             // show knowledge cue
             document.getElementById("drawingCue").innerHTML = categoryName; // change drawing cue
             if (trialType == "drawing") {
@@ -229,10 +251,12 @@ function beginTrial(){
         }
     }
     let currCue = document.querySelector(".cue").innerHTML
-    if (mode != "birch") {
-        document.querySelector(".cue").innerHTML = currCue + cuesLang["endQuestion"];
-    } else if (trialType == "drawing") {
-        document.querySelector(".cue").innerHTML = currCue + cuesLang["drawEndZorp"] + cuesLang["endQuestion"];
+    if (!categoryKey.includes("tutorial")) {
+        if (mode != "birch") {
+            document.querySelector(".cue").innerHTML = currCue + cuesLang["endQuestion"];
+        } else if (trialType == "drawing") {
+            document.querySelector(".cue").innerHTML = currCue + cuesLang["drawEndZorp"] + cuesLang["endQuestion"];
+        }
     }
     setTimeout(function() {showCue();},1000);
     if (mode != "birch") {
@@ -259,11 +283,21 @@ async function fullKnowledgeSetup() {
     monitorProgress();
 }
 
-function fullDrawingSetup() {
-    $('#cueVideoDiv').fadeOut();
+function fullDrawingSetup(player=null) {
+    let fromVideo = player != null
+    let timeout;
+    // longer timeout for video for smoother transition
+    if (fromVideo) {
+        timeout = 500
+    } else {
+        timeout = 125
+    }
     setTimeout(function(){
         $('.cue').hide(); // fade out cue
-        if (curTrial==0 || (curTrial == 1 & mode == 'birch')) { // after intro
+        if (fromVideo) {
+            player.dispose(); //dispose the old video and related eventlistener. Add a new video
+        }
+        if (curTrial==0 || (curTrial == 1 & mode == 'birch') || stimListTest[curTrial].category.includes('tutorial')) { // after intro
             console.log('starting first trial')
             curTrial = curTrial + 1
             setTimeout(function() {beginTrial()}, 250);  /// start trial sequence after intro trial
@@ -272,7 +306,7 @@ function fullDrawingSetup() {
             setUpDrawing(); // set up the drawing canvas
         }
         $("#cueVideoDiv").html("<video id='cueVideo' class='video-js' playsinline> </video>");
-    }, 125);
+    }, timeout);
 }
 // video player functions
 function playVideo(player){
@@ -281,21 +315,21 @@ function playVideo(player){
         this.play();
         this.on('ended',function(){
             console.log('video ends and drawing starts');
-            player.dispose(); //dispose the old video and related eventlistener. Add a new video
-            fullDrawingSetup()
+            $('#cueVideoDiv').fadeOut();
+            fullDrawingSetup(player)
         });
     });
 }
 
-function loadNextVideo(){
+function loadNextVideo(currentVidTrial){
     var player=videojs('cueVideo',{
         "controls": false,
         "preload":"auto"
     });
     player.pause();
     player.volume(1); // set volume to max 
-    console.log(stimListTest[curTrial].video)
-    player.src({ type: "video/mp4", src: "videos_smaller/" + stimListTest[curTrial].video });
+    console.log(stimListTest[currentVidTrial || curTrial].video)
+    player.src({ type: "video/mp4", src: `videos_smaller/${mode == "CDM_hybrid" ? "hybrid/" : ""}` + stimListTest[currentVidTrial || curTrial].video });
     player.load();
     return player;
 }
@@ -541,11 +575,20 @@ function endExperiment(){
     $('#drawing').hide();
     $("#knowledge").hide();
     $(".progress").hide();
-    document.querySelector(".cue").innerHTML = "Good job! You're all done!"
-    $(".cue").fadeIn('fast');
-    document.querySelector("#audioGif").style.maxWidth = "70vh";
-    document.querySelector("#audioGif").src = "zorpie/zorpie_stars.gif"
-    $("#gifContainer").fadeIn('fast');
+    document.querySelector(".cue").innerHTML = "Great job! You're all done!"
+    let finalTimeout = 6000
+    if (mode == "CDM_hybrid") {
+        stimListTest["end_experiment"] = {"video" : "greatjob.mp4"}
+        var player = loadNextVideo("end_experiment"); // change video
+        setTimeout(function() {$('.cue').fadeIn('fast');},1000);
+        setTimeout(function() {playVideo(player);},1000);
+        finalTimeout = 5000
+    } else {
+        $(".cue").fadeIn('fast');
+        document.querySelector("#audioGif").style.maxWidth = "70vh";
+        document.querySelector("#audioGif").src = "zorpie/zorpie_stars.gif"
+        $("#gifContainer").fadeIn('fast');
+    }
     setTimeout(function() {
         $('#mainExp').hide();
         $(thanksPage).show();
@@ -557,7 +600,7 @@ function endExperiment(){
             restartExperiment()
         }
     }, 60000);
-    }, 6000) 
+    }, finalTimeout) 
 }
 
 function increaseTrial(){
@@ -581,10 +624,13 @@ window.onload = function() {
                 consentPage = '#consentBing';
                 thanksPage = "#thanksBing";
                 console.log(" mode Bing")
-            }else if(mode=="CDM"){
+            }else if(mode=="CDM" || mode=="CDM_hybrid"){
                 consentPage = '#consentCDM';
                 thanksPage = "#thanksPage";
-                console.log("mode CDM")
+                console.log(`mode ${mode}`)
+                if (mode == "CDM_hybrid") {
+                    version = "cdm_hybrid_v1"
+                }
             } else if(mode == "birch"){
                 document.querySelector('#landingPage .logo-text').textContent = "Visual Learning Lab";
                 defaultLocation = "https://ucsdlearninglabs.org/kiddraw?mode=birch"
@@ -631,7 +677,7 @@ window.onload = function() {
                 startDrawing();
             }
 
-        }else if (mode == "CDM"){
+        }else if (mode == "CDM" || mode == "CDM_hybrid"){
             console.log("CDM");
             console.log(mode)
             if ((!$("#checkConsent").is(':checked'))) {

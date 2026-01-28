@@ -279,7 +279,7 @@ button[disabled] {
 
 
 #cueVideo {
-    width:60vw;
+    width:72vw;
     height:40vw;
     left: 0;
     right: 0;
@@ -287,6 +287,13 @@ button[disabled] {
     bottom:0;
     margin:auto;
     touch-action: none;
+}
+
+#cueVideoDiv {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: auto;
 }
 
 #cueAudio {
