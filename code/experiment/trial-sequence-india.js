@@ -27,7 +27,7 @@ var traceList = [{"category":"line", "audio": "trace_line.mp3", "image":"images/
     {"category":"shapes", "audio": "trace_shapes.mp3", "image":"images/square_circle.png"}
 ]
 var readable_date;
-var stimListTest = [
+var stimListTestTD = [
     {"category": "an airplane", "audio": "airplane.mp3"},
     {"category": "a bike", "audio": "bike.mp3"},
     {"category": "a car", "audio": "car.mp3"},
@@ -41,7 +41,23 @@ var stimListTest = [
     {"category": "a hat", "audio": "hat.mp3"},
     {"category": "a cup", "audio": "cup.mp3"}]
 
-var bonusList = [{"category": "a spoon", "audio": "spoon.mp3"},
+// sight restored
+var stimListTest = [
+     {"category": "a woman", "audio": "woman.mp3"},
+    {"category": "a bus", "audio": "bus.mp3"},
+    {"category": "a car", "audio": "car.mp3"},
+    {"category": "a chair", "audio": "chair.mp3"},
+    {"category": "a dog", "audio": "dog.mp3"},
+    {"category": "a face", "audio": "face.mp3"},
+    {"category": "a house", "audio": "house.mp3"},
+    {"category": "a phone", "audio": "phone.mp3"},
+    {"category": "a tree", "audio": "tree.mp3"},
+    {"category": "a man", "audio": "man.mp3"},
+    {"category": "a fish", "audio": "fish.mp3"},
+    {"category": "a cup", "audio": "cup.mp3"}
+]
+
+var bonusListTD = [{"category": "a spoon", "audio": "spoon.mp3"},
      {"category": "a train", "audio": "train.mp3"},
      {"category": "a bus", "audio": "bus.mp3"},
      {"category": "a fish", "audio": "fish.mp3"},
@@ -53,6 +69,18 @@ var bonusList = [{"category": "a spoon", "audio": "spoon.mp3"},
      {"category": "a toothbrush", "audio": "toothbrush.mp3"},
      {"category": "a key", "audio": "key.mp3"},
      {"category": "a dog", "audio": "dog.mp3"}]
+
+var bonusList = [{"category": "a spoon", "audio": "spoon.mp3"},
+     {"category": "a train", "audio": "train.mp3"},
+     {"category": "a bird", "audio": "bird.mp3"},
+     {"category": "a button", "audio": "button.mp3"},
+     {"category": "a cat", "audio": "cat.mp3"},
+     {"category": "eyeglasses", "audio": "eyeglasses.mp3"},
+     {"category": "shoe", "audio": "shoe.mp3"},
+     {"category": "a banana", "audio": "banana.mp3"},
+     {"category": "a toothbrush", "audio": "toothbrush.mp3"},
+     {"category": "a key", "audio": "key.mp3"},
+     {"category": "a monkey", "audio": "monkey.mp3"}]
 
 var stimListTest = shuffle(stimListTest)
 var bonusList = shuffle(bonusList)
@@ -106,7 +134,7 @@ var clickedSubmit=0; // whether an image is submitted or not
 var tracing = true; //whether the user is in tracing trials or not
 var maxTraceTrial = traceList.length; //the max number of tracing trials
 maxTraceTrial = maxTraceTrial + 1 // add one because the intro technically gets logged as a trial
-var timeLimit=30;
+var timeLimit=120; //30 for TD; todo add mode switch
 var disableDrawing = false; //whether touch drawing is disabled or not
 var language = "English";
 var strokeThresh = 3; // each stroke needs to be at least this many pixels long to be sent
