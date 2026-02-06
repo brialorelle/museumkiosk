@@ -19,10 +19,13 @@ const intro = {"category":"intro", "video": "intro.mp4","image":"images/lab_logo
 const audioCheck = {"category":"audio"}
 const lastTrial =  {"category": "museum", "video": "museum.mp4"}
 
+var showVideo = true; // whether to show videos or not, set to false for birch mode and SONA studies
+var isVLLStudy = false; // whether to show consent/ID that are specific to VLL
 var trialType = "drawing" //knowledge or drawing
 var zorpCue = "Let's teach Zorpie about some sea creatures! Zorpie has never seen any sea creatures before!"
 var zorpHello = "First, can you say 'Hi, Zorpie!'?"
 var zorpTeach = "Let's teach Zorpie what we know about "
+var hybridCue = "Today we're going to play a drawing game where you will draw some real things and some make-believe things!"
 var hybridTutorial = {"category" : "tutorial_hybrid", "video": "makebelieve.mp4"}
 
 var cdmStimList = [{"category": "a crab", "video": "crab.mp4"},
@@ -44,6 +47,16 @@ var cdmHybridStimList = [{"category": "a dinosaur truck", "video": "dinotruck.mp
     {"category": "an elephant snail", "video": "elephantsnail.mp4"}
 ]
 var hybridBasicDraw = {"category": "a dog", "video": "dog.mp4"} 
+var hybridAdults;
+Papa.parse('categories/hybrid_categories_sona.csv', {
+  header: true,
+  download: true,
+  skipEmptyLines: true,
+  complete: function(results) {
+    hybridAdults = results.data;
+    console.log(hybridAdults)
+  }
+});
 var birchTutorial =  {"category": "a penguin"}
 var birchStimList = [
     {"category": "a whale"},
@@ -139,14 +152,17 @@ function setupStim() {
             stimListTest.unshift(hybridTutorial)
             // adding dog drawing
             stimListTest.unshift(hybridBasicDraw)
-     } else {
+     } else if (mode == "SONA_hybrid") {
+            stimListTest = shuffle(hybridAdults)
+     }
+     else {
             stimListTest = shuffle(cdmStimList)
     }
     stimListTest.unshift(firstTrial)
     stimListTest.unshift(trace2)
     stimListTest.unshift(trace1)
     stimListTest.unshift(intro)
-    if (mode != "birch" && mode != "CDM_hybrid") {
+    if (mode != "birch" && mode != "CDM_hybrid" && mode != "SONA_hybrid") {
         stimListTest.push(lastTrial)
     } else if (mode == "birch") {
         stimListTest.splice(1, 0, audioCheck)
@@ -183,16 +199,20 @@ function startTrialPostCue() {
 }
 
 function showIntroVideo(){
-    if (mode != "birch") {
-        var player = loadNextVideo(curTrial); // change video
-        document.querySelector(".cue").innerHTML = "This game is for only one person at a time. Please draw by yourself!";
-    } else {
+    if (mode == "SONA_hybrid") {
+        document.querySelector(".cue").innerHTML = hybridCue;
+        document.querySelector(".cue").style.marginTop = "20vh"
+    } else if (mode == "birch") {
         document.querySelector(".cue").innerHTML = zorpCue;
         document.querySelector("#audioGif").src = "zorpie/zorpie_confused.gif"
         $("#gifContainer").fadeIn()
     }
+    else {
+        var player = loadNextVideo(curTrial); // change video
+        document.querySelector(".cue").innerHTML = "This game is for only one person at a time. Please draw by yourself!";
+    } 
     setTimeout(function() {showCue();},250);
-    if (mode != "birch") {
+    if (showVideo) {
         setTimeout(function() {playVideo(player);},1000);
     } else {
         $("#trialContinuer").fadeIn();
@@ -213,7 +233,7 @@ async function showAudioCheck() {
 // for the start of each trial
 function beginTrial(){
     //
-    if (mode != "birch") {
+    if (showVideo) {
         var player = loadNextVideo(curTrial); // change video
     }
     var categoryKey = stimListTest[curTrial].category;
@@ -259,7 +279,7 @@ function beginTrial(){
         }
     }
     setTimeout(function() {showCue();},1000);
-    if (mode != "birch") {
+    if (showVideo) {
         setTimeout(function() {playVideo(player);},1000);
     } 
 }
@@ -268,10 +288,12 @@ function beginTrial(){
 function showCue() {
     $('#mainExp').fadeIn('fast'); // fade in exp
     $('.cue').fadeIn('fast'); // text cue associated with trial
-    if (mode == "birch") {
+    if (!showVideo) {
         $('#cueVideoDiv').hide()
         $("#trialContinuer").fadeIn('fast');
-        $("#gifContainer").fadeIn('fast')
+        if (mode == "birch") {
+            $("#gifContainer").fadeIn('fast')
+        }
     }
 }
 
@@ -427,7 +449,7 @@ function progress(timeleft, timetotal, $element) {
 
 function modeSpecificIDs() {
     let current_data = {}
-    if (mode != "birch") {
+    if (mode != "birch" && mode != "SONA_hybrid") {
         var age = $('.active').attr('id');
         current_data = {
             age: age
@@ -585,9 +607,11 @@ function endExperiment(){
         finalTimeout = 5000
     } else {
         $(".cue").fadeIn('fast');
-        document.querySelector("#audioGif").style.maxWidth = "70vh";
-        document.querySelector("#audioGif").src = "zorpie/zorpie_stars.gif"
-        $("#gifContainer").fadeIn('fast');
+        if (mode == "birch") {
+            document.querySelector("#audioGif").style.maxWidth = "70vh";
+            document.querySelector("#audioGif").src = "zorpie/zorpie_stars.gif"
+            $("#gifContainer").fadeIn('fast');
+        }
     }
     setTimeout(function() {
         $('#mainExp').hide();
@@ -624,25 +648,26 @@ window.onload = function() {
                 consentPage = '#consentBing';
                 thanksPage = "#thanksBing";
                 console.log(" mode Bing")
-            }else if(mode=="CDM" || mode=="CDM_hybrid"){
+            } else if(mode=="CDM" || mode=="CDM_hybrid"){
                 consentPage = '#consentCDM';
                 thanksPage = "#thanksPage";
                 console.log(`mode ${mode}`)
                 if (mode == "CDM_hybrid") {
                     version = "cdm_hybrid_v1"
                 }
-            } else if(mode == "birch"){
+            } else if(mode == "birch" || mode == "SONA_hybrid"){
                 document.querySelector('#landingPage .logo-text').textContent = "Visual Learning Lab";
-                defaultLocation = "https://ucsdlearninglabs.org/kiddraw?mode=birch"
+                defaultLocation = `https://ucsdlearninglabs.org/kiddraw?mode=${mode}`
                 consentPage = '#consentBirch';
                 thanksPage = "#thanksBirch";
-                version = "birch_run_v1"
+                version =  `${mode}_run_v1`
+                showVideo = false;
+                isVLLStudy = true;
                 //$('.cue').attr('id', 'audioCue');
             }
             setupStim();
         });
     });
-    
 
     /////////////// GENERAL BUTTON FUNCTIONS ///////////////
     document.ontouchmove = function(event){
